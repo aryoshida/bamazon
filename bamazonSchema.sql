@@ -9,7 +9,7 @@ CREATE TABLE products(
   price INT NOT NULL,
   stock_quantity INT NOT NULL,
   PRIMARY KEY (id)
-  );
+);
 
   INSERT INTO  products (product_name, department_name, price, stock_quantity)
   VALUES ("Product1", "Food", 5, 50),
