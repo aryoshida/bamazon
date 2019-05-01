@@ -62,13 +62,13 @@ function selectProduct(){
                 console.log(err);
                 start();
             } else{
-                buyProducts();
+                buyProducts(answer.productId);
             }
         });
     });
 }
 
-function buyProducts(){
+function buyProducts(productId){
     inquirer.prompt(
         {
             name: "productQuantity",
@@ -78,14 +78,35 @@ function buyProducts(){
                 if (isNaN(value)) {
                     return false;
                 }
-                // TODO: instead of return true, check if there's enough stock
                 return true;
             }
         }
-    ).then(function(productQuantity) {
-        // update stock in database
-        console.log("Item purchased!");
-        start();
-        // return back to home
+    ).then(function(answer){
+        connection.query("SELECT stock_quantity FROM products WHERE ID = " + productId, function(err, res){
+            var product = res[0]; // get the first item in the array from the database
+            if (product.stock_quantity >= answer.productQuantity){
+                connection.query("UPDATE products SET ? WHERE ?",
+                [
+                    {
+                        stock_quantity: product.stock_quantity - answer.productQuantity
+                    },
+                    { 
+                        id: productId
+                    }
+                ],function(err2, res2){
+                    if(err2) {
+                        console.log("Failed to purchase item!");
+                        console.log(err2);
+                        start();
+                    } else {
+                        console.log("Item purchased");
+                        start();
+                    }
+                });
+            } else {
+                console.log("Not enough stock to purchase! Stock Available: " + product.stock_quantity);
+                start();
+            }
+        });
     });
 }
